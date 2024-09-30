@@ -1,0 +1,9 @@
+export const DEFAULT_PAGE = 1;
+export const DEFAULT_PER_PAGE = 10;
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+  OWNER_PARKING_LOT = 'OWNER_PARKING_LOT',
+  OWNER_PARKING_SLOT = 'OWNER_PARKING_SLOT',
+}

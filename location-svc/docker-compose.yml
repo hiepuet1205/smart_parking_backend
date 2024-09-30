@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  api:
+    container_name: smart_parking_location_svc
+    image: smart_parking_location_svc:1.0.0
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: npm run start:dev
+    env_file: .env
+    ports:
+      - '5002:5002'
+    networks:
+      - kong-net
+    volumes:
+      - .:/api
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    container_name: smart_parking_location_postgres
+    image: postgres:12
+    env_file: .env
+    environment:
+      - POSTGRES_USER=smart_parking_location
+      - POSTGRES_DB=smart_parking_location
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - postgres-location-data:/var/lib/postgresql/data
+    networks:
+      - kong-net
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  kong-net:
+    external: true
+
+volumes:
+  postgres-location-data:

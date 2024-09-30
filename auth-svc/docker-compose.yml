@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  api:
+    container_name: smart_parking_auth_svc
+    image: smart_parking_auth_svc:1.0.0
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: npm run start:dev
+    env_file: .env
+    ports:
+      - '5000:5000'
+    networks:
+      - kong-net
+    volumes:
+      - .:/api
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+networks:
+  kong-net:
+    external: true

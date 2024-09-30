@@ -1,0 +1,26 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "spec": {
+    "class": false,
+    "component": true,
+    "module": false,
+    "service": true
+  },
+  "compilerOptions": {
+    "assets": [
+      {
+        "include": "i18n/**/*",
+        "watchAssets": true
+      },
+      {
+        "include": "mail/templates/**/*",
+        "watchAssets": true
+      },
+      {
+        "include": "protos/**/*.proto",
+        "watchAssets": true
+      }
+    ]
+  }
+}
