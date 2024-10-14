@@ -1,6 +1,6 @@
 import { ParkingSlot } from '@ParkingSlot/entity/parking-slot.entity';
 import { BaseEntity } from '@shared/entity/base.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany, Point } from 'typeorm';
 
 @Entity('locations')
 export class Location extends BaseEntity<Location> {
@@ -28,4 +28,13 @@ export class Location extends BaseEntity<Location> {
 
   @OneToMany(() => ParkingSlot, (parkingSlot) => parkingSlot.location)
   parkingSlots: ParkingSlot[];
+
+  @Index({ spatial: true })
+  @Column({
+    type: 'geography',
+    spatialFeatureType: 'Point',
+    srid: 4326,
+    nullable: true,
+  })
+  point: Point;
 }

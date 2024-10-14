@@ -8,7 +8,6 @@ import { config } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { USER_PACKAGE_NAME } from '@protos/user/user';
 import { join } from 'path';
 
 async function bootstrap() {
@@ -44,20 +43,6 @@ async function bootstrap() {
     secretAccessKey: configService.get('AWS_SECRET_ACCESS_KEY'),
     region: configService.get('AWS_S3_REGION'),
   });
-
-  app.connectMicroservice<MicroserviceOptions>(
-    {
-      transport: Transport.GRPC,
-      options: {
-        url: configService.get('grpcServerUrl'),
-        package: USER_PACKAGE_NAME,
-        protoPath: join(__dirname, 'protos/user/user.proto'),
-      },
-    },
-    {
-      inheritAppConfig: true,
-    },
-  );
 
   await Promise.all([app.startAllMicroservices(), app.listen(process.env.PORT)]);
 }

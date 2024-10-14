@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package location;
+
+service LocationService {
+  rpc UpdateStatusSlot (UpdateStatusSlotRequest) returns (UpdateStatusSlotResponse) {}
+}
+
+message UpdateStatusSlotRequest {
+  int32 id = 1;
+  string status = 2;
+}
+
+message UpdateStatusSlotResponse {
+  int32 id = 1;
+}

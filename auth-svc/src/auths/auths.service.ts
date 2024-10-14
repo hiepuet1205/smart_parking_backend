@@ -5,6 +5,7 @@ import { TokenPayload } from '@shared/interfaces/token-payload.interface';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { UserServiceGrpc } from '@shared/grpc/services';
+import { FileService } from '@shared/services/file.service';
 
 @Injectable()
 export class AuthsService {
@@ -12,6 +13,7 @@ export class AuthsService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly userServiceGrpc: UserServiceGrpc,
+    private readonly fileService: FileService,
   ) {}
 
   async login(loginDto: LoginDto) {

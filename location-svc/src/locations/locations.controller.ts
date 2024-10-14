@@ -7,10 +7,15 @@ import { JwtAccessTokenGuard } from '@web-init/guards/jwt-access-token.guard';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationsService } from './locations.service';
 
-// @UseGuards(JwtAccessTokenGuard)
+@UseGuards(JwtAccessTokenGuard)
 @Controller('locations')
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
+
+  @Post('range')
+  public async getRange(@Body() location: { lat: number; long: number; range: number }) {
+    return await this.locationsService.getRange(location.lat, location.long, location.range);
+  }
 
   @Get('/user')
   async getLocationsOfUser(@User('userId') userId: number) {
@@ -29,7 +34,7 @@ export class LocationsController {
 
   @Post('')
   @UseInterceptors(FileInterceptor('file'))
-  async signUp(
+  async createLocation(
     @User('userId') userId: number,
     @Body(new FormattedValidationPipe('locations')) createLocationDto: CreateLocationDto,
     @UploadedFile(new FileValidationPipe(['image/png', 'image/jpeg'])) file: Express.Multer.File,

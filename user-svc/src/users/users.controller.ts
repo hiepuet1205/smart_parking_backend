@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { SignUpDto } from './dto/create-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,7 +18,13 @@ export class UsersController {
 
   @UseGuards(JwtAccessTokenGuard)
   @Get('info')
-  async getInfo(@User('user_id') userId: number) {
+  async getInfo(@User('id') userId: number) {
     return this.usersService.getInfo(userId);
+  }
+
+  @UseGuards(JwtAccessTokenGuard)
+  @Get('')
+  async getUser(@Query('email') email: string) {
+    return this.usersService.getUser(email);
   }
 }

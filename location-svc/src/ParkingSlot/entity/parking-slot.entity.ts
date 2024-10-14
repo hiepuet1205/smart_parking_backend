@@ -15,17 +15,19 @@ export class ParkingSlot extends BaseEntity<ParkingSlot> {
   @Column({ type: 'float' })
   priceHour: number;
 
-  @Column({
-    type: 'enum',
-    enum: ParkingSlotStatus,
-    default: 'AVAILABLE',
-  })
-  status: ParkingSlotStatus;
-
   @Column({ name: 'user_id' })
   userId: number;
+
+  @Column({ name: 'co_user_id', nullable: true })
+  coUserId: number;
+
+  @Column({ nullable: true })
+  image: string;
 
   @ManyToOne(() => Location, (location) => location.parkingSlots)
   @JoinColumn({ name: 'location_id' })
   location: Location;
+
+  @Column({ type: 'enum', enum: ParkingSlotStatus, default: ParkingSlotStatus.AVAILABLE })
+  status: ParkingSlotStatus;
 }

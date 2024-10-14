@@ -91,7 +91,7 @@ volumes:
 
 networks:
   kong-net:
-    driver: bridge
+    external: true
 
 # Verify your installation: curl -i -X GET --url http://localhost:8001/services
 # Admin page: http://localhost:8002

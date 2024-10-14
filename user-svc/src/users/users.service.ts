@@ -52,4 +52,11 @@ export class UsersService {
   async getInfo(userId: number) {
     return await this.usersRepository.findOne({ where: { id: userId } });
   }
+
+  async getUser(email: string) {
+    const user = await this.usersRepository.findOne({ where: { email } });
+
+    if (!user) throw new BadRequestException('Email not found');
+    return user;
+  }
 }

@@ -1,4 +1,23 @@
-import { OmitType } from '@nestjs/swagger';
-import { CreateParkingSlotDto } from './create-parking-slot.dto';
+import { Type } from 'class-transformer';
+import { IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateParkingSlotDto extends OmitType(CreateParkingSlotDto, ['locationId']) {}
+export class UpdateParkingSlotDto {
+  @IsOptional()
+  @IsString()
+  extractLocation: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  priceHour: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  locationId: number;
+
+  @IsInt()
+  @IsOptional()
+  @Type(() => Number)
+  coUserId: number;
+}

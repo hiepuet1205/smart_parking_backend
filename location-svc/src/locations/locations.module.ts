@@ -7,10 +7,11 @@ import { LocationsService } from './locations.service';
 import { GoongService } from '@shared/services/goong.service';
 import { Location } from '@locations/entities/location.entity';
 import { HttpModule } from '@nestjs/axios';
+import { ParkingSlotRepository } from '@shared/repository/parking-slot.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Location]), HttpModule],
   controllers: [LocationsController],
-  providers: [LocationsService, LocationRepository, FileService, GoongService],
+  providers: [LocationsService, LocationRepository, FileService, GoongService, ParkingSlotRepository],
 })
 export class LocationsModule {}

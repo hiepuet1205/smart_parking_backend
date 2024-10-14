@@ -14,11 +14,13 @@ export class AuthsController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
+      path: '/',
     });
     res.cookie('accessToken', result.data.accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
+      path: '/',
     });
     res.status(HttpStatus.OK).json(result);
   }

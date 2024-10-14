@@ -9,8 +9,7 @@ import { ResponseLogger } from '@shared/intercept/responseLogger.intercept';
 import { DataSource } from 'typeorm';
 import configuration from './config';
 import { WebInitModule } from '@web-init/web-init.module';
-import { LocationsModule } from '@locations/locations.module';
-import { ParkingSlotModule } from '@ParkingSlot/parking-slot.module';
+import { RentRequestsModule } from '@rent/rent.module';
 
 @Module({
   imports: [
@@ -50,8 +49,7 @@ import { ParkingSlotModule } from '@ParkingSlot/parking-slot.module';
     }),
     LoggerModule,
     WebInitModule,
-    LocationsModule,
-    ParkingSlotModule,
+    RentRequestsModule
   ],
   providers: [
     {
