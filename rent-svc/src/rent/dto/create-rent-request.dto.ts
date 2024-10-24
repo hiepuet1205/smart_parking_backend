@@ -5,4 +5,5 @@ export class CreateRentRequestDto {
   vehicleId: number;
   pricePerHour: number;
   depositAmount: number;
+  txnRef: string;
 }

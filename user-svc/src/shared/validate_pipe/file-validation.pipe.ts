@@ -1,8 +1,5 @@
-import { UnsupportedMediaTypeException } from '@nestjs/common';
+import { Injectable, PipeTransform, UnsupportedMediaTypeException } from '@nestjs/common';
 import { fromBuffer } from 'file-type';
-import { Injectable, PipeTransform, BadRequestException } from '@nestjs/common';
-import { t } from '@shared/utils';
-import { FieldErrorsResponseDto } from '@shared/dto/res/app.base.response';
 
 @Injectable()
 export class FileValidationPipe implements PipeTransform {
@@ -10,15 +7,7 @@ export class FileValidationPipe implements PipeTransform {
 
   async transform(file: Express.Multer.File): Promise<Express.Multer.File> {
     if (!file) {
-      throw new BadRequestException({
-        errors: [
-          {
-            resource: 'File Upload',
-            field: 'File',
-            message: t('common.response_message.file_required'),
-          },
-        ],
-      } as FieldErrorsResponseDto);
+      return null;
     }
 
     const fileInfo = await fromBuffer(file.buffer);

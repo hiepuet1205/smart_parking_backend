@@ -20,6 +20,14 @@
       {
         "include": "protos/**/*.proto",
         "watchAssets": true
+      },
+      {
+        "include": "shared/grpc/protos/**/*.proto",
+        "watchAssets": true
+      },
+      {
+        "include": "certs/*",
+        "watchAssets": true
       }
     ]
   }

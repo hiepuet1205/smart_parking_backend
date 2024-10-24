@@ -1,0 +1,5 @@
+export enum ParkingSlotStatus {
+  AVAILABLE = 'AVAILABLE',
+  UNAVAILABLE = 'UNAVAILABLE',
+  TEMP_UNAVAILABLE = 'TEMP_UNAVAILABLE',
+}

@@ -11,6 +11,7 @@ import configuration from './config';
 import { WebInitModule } from '@web-init/web-init.module';
 import { LocationsModule } from '@locations/locations.module';
 import { ParkingSlotModule } from '@ParkingSlot/parking-slot.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ParkingSlotModule } from '@ParkingSlot/parking-slot.module';
     WebInitModule,
     LocationsModule,
     ParkingSlotModule,
+    ScheduleModule.forRoot(),
   ],
   providers: [
     {

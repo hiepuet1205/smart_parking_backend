@@ -1,7 +1,13 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
-import { LOCATION_PACKAGE_NAME, LocationServiceClient, UpdateStatusSlotRequest, UpdateStatusSlotResponse } from '@shared/grpc/protos/location/location';
-import { firstValueFrom, catchError, throwError } from 'rxjs';
+import {
+  GetInfoSlotRequest,
+  LOCATION_PACKAGE_NAME,
+  LocationServiceClient,
+  UpdateStatusSlotRequest,
+  UpdateStatusSlotResponse,
+} from '@shared/grpc/protos/location/location';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class LocationServiceGrpc implements OnModuleInit {
@@ -16,6 +22,14 @@ export class LocationServiceGrpc implements OnModuleInit {
   async updateStatusSlot(request: UpdateStatusSlotRequest): Promise<UpdateStatusSlotResponse> {
     try {
       return await firstValueFrom(this.locationServiceClient.updateStatusSlot(request));
+    } catch (error) {
+      throw new RpcException(error);
+    }
+  }
+
+  async getInfoSlot(request: GetInfoSlotRequest) {
+    try {
+      return await firstValueFrom(this.locationServiceClient.getInfoSlot(request));
     } catch (error) {
       throw new RpcException(error);
     }

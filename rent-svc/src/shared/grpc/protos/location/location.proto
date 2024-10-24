@@ -4,6 +4,7 @@ package location;
 
 service LocationService {
   rpc UpdateStatusSlot (UpdateStatusSlotRequest) returns (UpdateStatusSlotResponse) {}
+  rpc GetInfoSlot (GetInfoSlotRequest) returns (GetInfoSlotResponse) {}
 }
 
 message UpdateStatusSlotRequest {
@@ -13,4 +14,29 @@ message UpdateStatusSlotRequest {
 
 message UpdateStatusSlotResponse {
   int32 id = 1;
+}
+
+message GetInfoSlotRequest {
+  int32 id = 1;
+}
+
+message GetInfoSlotResponse {
+  int32 id = 1;
+  string status = 2;
+  string extractLocation = 3;
+  string priceHour = 4;
+  int32 userId = 5;
+  int32 coUserId = 6;
+  string image = 7;
+  Location location = 8;
+}
+
+message Location {
+  int32 id = 1;
+  string name = 2;
+  string location = 3;
+  string image = 4;
+  string long = 5;
+  string lat = 6;
+  int32 userId = 7;
 }

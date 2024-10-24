@@ -1,0 +1,15 @@
+version: "2"
+authtoken: "1rkJFSFWRH0gLMYKNxf0wLT12hU_6XM6xKeNLQZsritBYCcug"
+web_addr: "0.0.0.0:8081"
+update: false
+log: "stdout"
+
+tunnels:
+  kong-gateway:
+    addr: "192.168.0.1:8000"
+    proto: "http"
+    region: "ap"
+  frontend:
+    addr: "192.168.0.1:9000"
+    proto: "http"
+    region: "ap"

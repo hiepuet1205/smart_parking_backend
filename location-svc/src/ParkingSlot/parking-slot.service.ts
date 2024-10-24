@@ -14,12 +14,12 @@ export class ParkingSlotService {
     private readonly fileService: FileService,
   ) {}
 
-  async getParkingSlot(userId: number, locationId: number, keyword?: string) {
+  async getParkingSlot(locationId: number, keyword?: string) {
     if (!keyword)
-      return await this.parkingSlotRepository.find({ where: { userId, location: { id: locationId } }, relations: ['location'] });
+      return await this.parkingSlotRepository.find({ where: { location: { id: locationId } }, relations: ['location'] });
 
     return await this.parkingSlotRepository.find({
-      where: { userId, location: { id: locationId }, extractLocation: ILike(`%${keyword}%`) },
+      where: { location: { id: locationId }, extractLocation: ILike(`%${keyword}%`) },
       relations: ['location'],
     });
   }

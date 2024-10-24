@@ -8,6 +8,9 @@ import { In, Point } from 'typeorm';
 import { ParkingSlotRepository } from '@shared/repository/parking-slot.repository';
 import { ParkingSlotStatus } from '@ParkingSlot/enum/parking-slot-status.enum';
 import { UpdateStatusSlotDto } from './dto/update-status-slot.dto';
+import { GetInfoSlotRequest, GetInfoSlotResponse } from '@protos/location/location';
+import { CronJob } from 'cron';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class LocationsService {
@@ -16,6 +19,7 @@ export class LocationsService {
     private readonly fileService: FileService,
     private readonly goongService: GoongService,
     private readonly parkingSlotRepository: ParkingSlotRepository,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async createLocation(userId: number, createLocationDto: CreateLocationDto, file: Express.Multer.File) {
@@ -137,8 +141,40 @@ export class LocationsService {
   }
 
   async updateStatusSlot(request: UpdateStatusSlotDto) {
-    return await this.parkingSlotRepository.update(request.id, {
+    await this.parkingSlotRepository.update(request.id, {
       status: request.status,
     });
+
+    if (request.status === ParkingSlotStatus.TEMP_UNAVAILABLE) {
+      const job = new CronJob('*/5 * * * *', async () => {
+        await this.parkingSlotRepository.update(request.id, {
+          status: ParkingSlotStatus.AVAILABLE,
+        });
+        this.schedulerRegistry.deleteCronJob(`update-status-job-${request.id}`);
+      });
+
+      this.schedulerRegistry.addCronJob(`update-status-job-${request.id}`, job);
+      job.start();
+    }
+
+    return {
+      id: request.id,
+    };
+  }
+
+  async getInfoSlot(request: GetInfoSlotRequest) {
+    const slot = await this.parkingSlotRepository.findOne({ where: { id: request.id }, relations: ['location'] });
+
+    if (!slot) throw new NotFoundException('Slot not found');
+
+    return {
+      ...slot,
+      priceHour: slot?.priceHour.toString() || '0',
+      location: {
+        ...slot?.location,
+        long: slot?.location?.long?.toString() || '0',
+        lat: slot?.location?.lat?.toString() || '0',
+      },
+    } as GetInfoSlotResponse;
   }
 }

@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { USER_PACKAGE_NAME } from '../protos/location/user';
+import { LOCATION_PACKAGE_NAME } from '../protos/location/location';
+import { USER_PACKAGE_NAME } from '../protos/user/user';
 
 export const loader = {
   longs: String,
@@ -16,6 +17,21 @@ export const loader = {
 @Module({
   imports: [],
   providers: [
+    {
+      provide: LOCATION_PACKAGE_NAME,
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.GRPC,
+          options: {
+            package: LOCATION_PACKAGE_NAME,
+            protoPath: join(__dirname, '../protos/location/location.proto'),
+            loader,
+            url: configService.get('locationGrpcUrl'),
+          },
+        });
+      },
+      inject: [ConfigService],
+    },
     {
       provide: USER_PACKAGE_NAME,
       useFactory: (configService: ConfigService) => {
@@ -32,6 +48,6 @@ export const loader = {
       inject: [ConfigService],
     },
   ],
-  exports: [USER_PACKAGE_NAME],
+  exports: [LOCATION_PACKAGE_NAME, USER_PACKAGE_NAME],
 })
 export class GrpcModule {}

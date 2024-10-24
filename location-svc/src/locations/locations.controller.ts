@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Query, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { User } from '@shared/decorators/user.decorator';
 import { FileValidationPipe } from '@shared/validate_pipe/file-validation.pipe';
@@ -12,8 +12,8 @@ import { LocationsService } from './locations.service';
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
-  @Post('range')
-  public async getRange(@Body() location: { lat: number; long: number; range: number }) {
+  @Get('range')
+  public async getRange(@Query() location: { lat: number; long: number; range: number }) {
     return await this.locationsService.getRange(location.lat, location.long, location.range);
   }
 

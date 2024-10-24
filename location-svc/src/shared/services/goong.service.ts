@@ -17,9 +17,7 @@ export class GoongService {
   // Get place detail by Id
   async getPlaceDetailById(placeId: string) {
     const url = `https://rsapi.goong.io/Place/Detail?place_id=${placeId}&api_key=${this.apiKey}`;
-    console.log(url);
     const response = await firstValueFrom(this.httpService.get(url));
-    console.log(response.data);
     return response.data;
   }
 }

@@ -10,6 +10,17 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "user";
 
+export interface GetVehicleInfoRequest {
+  id: number;
+}
+
+export interface GetVehicleInfoResponse {
+  id: number;
+  type: string;
+  licensePlates: string;
+  image: string;
+}
+
 export interface GetUserByIdRequest {
   id: number;
 }
@@ -45,12 +56,32 @@ export interface GetUserByEmailResponse {
   user: User | undefined;
 }
 
+export interface SendNotificationsRequest {
+  title: string;
+  body: string;
+  userIds: number[];
+  data: { [key: string]: string };
+}
+
+export interface SendNotificationsRequest_DataEntry {
+  key: string;
+  value: string;
+}
+
+export interface SendNotificationsResponse {
+  status: string;
+}
+
 export const USER_PACKAGE_NAME = "user";
 
 export interface UserServiceClient {
   getUserById(request: GetUserByIdRequest): Observable<GetUserByIdResponse>;
 
   getUserByEmail(request: GetUserByEmailRequest): Observable<GetUserByEmailResponse>;
+
+  sendNotifications(request: SendNotificationsRequest): Observable<SendNotificationsResponse>;
+
+  getVehicleInfo(request: GetVehicleInfoRequest): Observable<GetVehicleInfoResponse>;
 }
 
 export interface UserServiceController {
@@ -61,11 +92,19 @@ export interface UserServiceController {
   getUserByEmail(
     request: GetUserByEmailRequest,
   ): Promise<GetUserByEmailResponse> | Observable<GetUserByEmailResponse> | GetUserByEmailResponse;
+
+  sendNotifications(
+    request: SendNotificationsRequest,
+  ): Promise<SendNotificationsResponse> | Observable<SendNotificationsResponse> | SendNotificationsResponse;
+
+  getVehicleInfo(
+    request: GetVehicleInfoRequest,
+  ): Promise<GetVehicleInfoResponse> | Observable<GetVehicleInfoResponse> | GetVehicleInfoResponse;
 }
 
 export function UserServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getUserById", "getUserByEmail"];
+    const grpcMethods: string[] = ["getUserById", "getUserByEmail", "sendNotifications", "getVehicleInfo"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UserService", method)(constructor.prototype[method], method, descriptor);

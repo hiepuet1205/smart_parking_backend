@@ -1,2 +1,3 @@
 export * from './handler/grpc.module';
-export * from './protos/location/user';
+export * from './services/location/location.grpc.service';
+export * from './services/user/user.grpc.service';

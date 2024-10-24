@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: npm run start:dev
+    command: npm run start
     env_file: .env
     ports:
       - '5000:5000'
@@ -15,7 +15,7 @@ services:
       - kong-net
     volumes:
       - .:/api
-    restart: unless-stopped
+    # restart: unless-stopped
     tty: true
     stdin_open: true
 

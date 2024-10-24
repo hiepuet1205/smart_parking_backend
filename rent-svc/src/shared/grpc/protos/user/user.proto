@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {}
+  rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse) {}
+  rpc SendNotifications(SendNotificationsRequest) returns (SendNotificationsResponse) {}
+  rpc GetVehicleInfo(GetVehicleInfoRequest) returns (GetVehicleInfoResponse) {}
+}
+
+message GetVehicleInfoRequest {
+  int32 id = 1;
+}
+
+message GetVehicleInfoResponse {
+  int32 id = 1;
+  string type = 2;
+  string licensePlates = 3;
+  string image = 4;
+}
+
+message GetUserByIdRequest {
+  int32 id = 1;
+}
+
+message GetUserByIdResponse {
+  User user = 1;
+}
+
+message User {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+  string avatar = 4;
+  string total = 5;
+  string status = 6;
+  string role = 7;
+  repeated Vehicle vehicles = 8;
+  string password = 9;
+}
+
+message Vehicle {
+  int32 id = 1;
+  string type = 2;
+  string license_plates = 3;
+  string image = 4;
+}
+
+message GetUserByEmailRequest {
+  string email = 1;
+}
+
+message GetUserByEmailResponse {
+  User user = 1;
+}
+
+message SendNotificationsRequest {
+  string title = 1;
+  string body = 2;
+  repeated int32 userIds = 3;
+  map<string, string> data = 4;
+}
+
+message SendNotificationsResponse {
+  string status = 1;
+}

@@ -7,9 +7,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { config } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { USER_PACKAGE_NAME } from '@protos/user/user';
-import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -45,20 +42,6 @@ async function bootstrap() {
     region: configService.get('AWS_S3_REGION'),
   });
 
-  app.connectMicroservice<MicroserviceOptions>(
-    {
-      transport: Transport.GRPC,
-      options: {
-        url: configService.get('grpcServerUrl'),
-        package: USER_PACKAGE_NAME,
-        protoPath: join(__dirname, 'protos/user/user.proto'),
-      },
-    },
-    {
-      inheritAppConfig: true,
-    },
-  );
-
-  await Promise.all([app.startAllMicroservices(), app.listen(process.env.PORT)]);
+  await Promise.all([app.listen(process.env.PORT)]);
 }
 bootstrap();

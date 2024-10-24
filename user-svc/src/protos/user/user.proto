@@ -5,6 +5,19 @@ package user;
 service UserService {
   rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {}
   rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse) {}
+  rpc SendNotifications(SendNotificationsRequest) returns (SendNotificationsResponse) {}
+  rpc GetVehicleInfo(GetVehicleInfoRequest) returns (GetVehicleInfoResponse) {}
+}
+
+message GetVehicleInfoRequest {
+  int32 id = 1;
+}
+
+message GetVehicleInfoResponse {
+  int32 id = 1;
+  string type = 2;
+  string licensePlates = 3;
+  string image = 4;
 }
 
 message GetUserByIdRequest {
@@ -40,4 +53,15 @@ message GetUserByEmailRequest {
 
 message GetUserByEmailResponse {
   User user = 1;
+}
+
+message SendNotificationsRequest {
+  string title = 1;
+  string body = 2;
+  repeated int32 userIds = 3;
+  map<string, string> data = 4;
+}
+
+message SendNotificationsResponse {
+  string status = 1;
 }

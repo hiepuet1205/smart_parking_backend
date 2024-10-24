@@ -10,6 +10,7 @@ import { DataSource } from 'typeorm';
 import configuration from './config';
 import { WebInitModule } from '@web-init/web-init.module';
 import { RentRequestsModule } from '@rent/rent.module';
+import { MqttModule } from '@mqtt/mqtt.module';
 
 @Module({
   imports: [
@@ -49,7 +50,8 @@ import { RentRequestsModule } from '@rent/rent.module';
     }),
     LoggerModule,
     WebInitModule,
-    RentRequestsModule
+    RentRequestsModule,
+    MqttModule,
   ],
   providers: [
     {

@@ -19,21 +19,52 @@ export interface UpdateStatusSlotResponse {
   id: number;
 }
 
+export interface GetInfoSlotRequest {
+  id: number;
+}
+
+export interface GetInfoSlotResponse {
+  id: number;
+  status: string;
+  extractLocation: string;
+  priceHour: string;
+  userId: number;
+  coUserId: number;
+  image: string;
+  location: Location | undefined;
+}
+
+export interface Location {
+  id: number;
+  name: string;
+  location: string;
+  image: string;
+  long: string;
+  lat: string;
+  userId: number;
+}
+
 export const LOCATION_PACKAGE_NAME = "location";
 
 export interface LocationServiceClient {
   updateStatusSlot(request: UpdateStatusSlotRequest): Observable<UpdateStatusSlotResponse>;
+
+  getInfoSlot(request: GetInfoSlotRequest): Observable<GetInfoSlotResponse>;
 }
 
 export interface LocationServiceController {
   updateStatusSlot(
     request: UpdateStatusSlotRequest,
   ): Promise<UpdateStatusSlotResponse> | Observable<UpdateStatusSlotResponse> | UpdateStatusSlotResponse;
+
+  getInfoSlot(
+    request: GetInfoSlotRequest,
+  ): Promise<GetInfoSlotResponse> | Observable<GetInfoSlotResponse> | GetInfoSlotResponse;
 }
 
 export function LocationServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["updateStatusSlot"];
+    const grpcMethods: string[] = ["updateStatusSlot", "getInfoSlot"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("LocationService", method)(constructor.prototype[method], method, descriptor);

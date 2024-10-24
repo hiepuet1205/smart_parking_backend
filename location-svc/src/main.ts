@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { LOCATION_PACKAGE_NAME } from '@protos/location/location';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -43,6 +44,20 @@ async function bootstrap() {
     secretAccessKey: configService.get('AWS_SECRET_ACCESS_KEY'),
     region: configService.get('AWS_S3_REGION'),
   });
+
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.GRPC,
+      options: {
+        url: configService.get('grpcServerUrl'),
+        package: LOCATION_PACKAGE_NAME,
+        protoPath: join(__dirname, 'protos/location/location.proto'),
+      },
+    },
+    {
+      inheritAppConfig: true,
+    },
+  );
 
   await Promise.all([app.startAllMicroservices(), app.listen(process.env.PORT)]);
 }

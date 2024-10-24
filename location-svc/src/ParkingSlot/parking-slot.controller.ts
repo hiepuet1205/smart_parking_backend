@@ -23,8 +23,8 @@ export class ParkingSlotController {
 
   @Roles([UserRole.OWNER_PARKING_LOT])
   @Get(':locationId')
-  async getParkingSlot(@User('userId') userId: number, @Param('locationId') locationId: number, @Query('keyword') keyword?: string) {
-    return await this.parkingSlotService.getParkingSlot(userId, locationId, keyword);
+  async getParkingSlot(@Param('locationId') locationId: number, @Query('keyword') keyword?: string) {
+    return await this.parkingSlotService.getParkingSlot(locationId, keyword);
   }
 
   @Roles([UserRole.OWNER_PARKING_SLOT])
