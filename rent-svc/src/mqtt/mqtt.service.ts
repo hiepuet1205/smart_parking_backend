@@ -8,11 +8,13 @@ import { AiService } from '@shared/services/ai.service';
 import { LoggerService } from '@logger/logger.service';
 import { RentRequestRepository } from '@shared/repository/rent-request.repository';
 import { UserServiceGrpc } from '@shared/grpc';
-import { SendNotificationsRequest } from 'dist/protos/user/user';
 import FuzzySet from 'fuzzyset.js';
+import { SendNotificationsRequest } from '@shared/grpc/protos/user/user';
 
 @Injectable()
 export class MqttService implements OnModuleInit {
+  private client: Mqtt5Client;
+
   constructor(
     private readonly fileService: FileService,
     private readonly aiService: AiService,
@@ -26,25 +28,25 @@ export class MqttService implements OnModuleInit {
     const cert = path.resolve(__dirname, '../certs/217c88dab6067ac76915cd5225e31968ab12f208d768ab93169cea5408bae80c-certificate.pem.crt');
     const key = path.resolve(__dirname, '../certs/217c88dab6067ac76915cd5225e31968ab12f208d768ab93169cea5408bae80c-private.pem.key');
     const builder = AwsIotMqtt5ClientConfigBuilder.newDirectMqttBuilderWithMtlsFromPath(endpoint, cert, key).build();
-    const client: Mqtt5Client = new Mqtt5Client(builder);
-    client.start();
-    client.on('error', () => {
+    this.client = new Mqtt5Client(builder);
+    this.client.start();
+    this.client.on('error', () => {
       this.logger.log('AWS IOT MQTT Connection error');
     });
-    client.on('attemptingConnect', () => {
+    this.client.on('attemptingConnect', () => {
       this.logger.log('AWS IOT MQTT trying to Connect...');
     });
-    client.on('connectionSuccess', () => {
+    this.client.on('connectionSuccess', () => {
       this.logger.log('AWS IOT MQTT Connection successfull');
     });
-    client.on('connectionFailure', (data) => {
+    this.client.on('connectionFailure', (data) => {
       this.logger.log('AWS IOT MQTT Connection failed');
       this.logger.error(data.error.error_name, data.error.error_name);
     });
-    client.on('disconnection', () => {
+    this.client.on('disconnection', () => {
       this.logger.log('AWS IOT MQTT Connection disconnected');
     });
-    client.on('messageReceived', async (eventData: MessageReceivedEvent) => {
+    this.client.on('messageReceived', async (eventData: MessageReceivedEvent) => {
       const payload = JSON.parse(new TextDecoder().decode(eventData.message.payload as ArrayBuffer));
 
       this.logger.log(payload);
@@ -79,16 +81,33 @@ export class MqttService implements OnModuleInit {
           } as SendNotificationsRequest);
         }
       } catch (error) {
-        console.log(error);
         this.logger.error(error.message, error.stack);
       }
     });
-    await client.subscribe({
+    await this.client.subscribe({
       subscriptions: [{ qos: 1, topicFilter: 'esp32/pub' }],
     });
     return true;
   }
   async onModuleInit() {
     await this.mqttNew();
+  }
+
+  async publishMessage(topic: string, payload: string, qos: number = 1): Promise<void> {
+    if (!this.client) {
+      this.logger.error('MQTT Client is not initialized', 'AWS IOT MQTT Connection error');
+      return;
+    }
+
+    try {
+      await this.client.publish({
+        qos,
+        topicName: topic,
+        payload,
+      });
+      this.logger.log(`Message published to ${topic}: ${payload}`);
+    } catch (error) {
+      this.logger.error(`Failed to publish message: ${error.message}`, error.stack);
+    }
   }
 }
