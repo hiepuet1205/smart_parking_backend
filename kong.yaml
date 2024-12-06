@@ -1,0 +1,508 @@
+_format_version: "3.0"
+plugins:
+- config:
+    credentials: true
+    exposed_headers:
+    - Authorization
+    - Content-Type
+    headers:
+    - Content-Type
+    - Authorization
+    - Accept
+    - Origin
+    - Referer
+    - User-Agent
+    max_age: 3600
+    methods:
+    - GET
+    - HEAD
+    - PUT
+    - PATCH
+    - POST
+    - DELETE
+    - OPTIONS
+    - TRACE
+    - CONNECT
+    origins:
+    - http://localhost:9000
+    - https://smart-parking-frontend-n1vb8qqba-hiepuetnbks-projects.vercel.app
+    - https://smart-parking-frontend-zeta.vercel.app
+    preflight_continue: true
+    private_network: true
+  enabled: true
+  name: cors
+  protocols:
+  - grpc
+  - grpcs
+  - http
+  - https
+- config:
+    custom_fields_by_lua: {}
+    path: /tmp/file.log
+    reopen: false
+  enabled: true
+  instance_name: logs
+  name: file-log
+  protocols:
+  - grpc
+  - grpcs
+  - http
+  - https
+- config:
+    bandwidth_metrics: true
+    latency_metrics: true
+    per_consumer: true
+    status_code_metrics: true
+    upstream_health_metrics: true
+  enabled: true
+  name: prometheus
+  protocols:
+  - grpc
+  - grpcs
+  - http
+  - https
+services:
+- connect_timeout: 60000
+  enabled: true
+  host: smart_parking_auth_svc
+  name: smart_parking_auth_svc
+  path: /
+  port: 5000
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: Login
+    path_handling: v1
+    paths:
+    - /api/v1/auths/login
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  write_timeout: 60000
+- connect_timeout: 60000
+  enabled: true
+  host: smart_parking_location_svc
+  name: smart_parking_location_svc
+  path: /
+  port: 5002
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: Create-location
+    path_handling: v1
+    paths:
+    - /api/v1/locations
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: Create-slot
+    path_handling: v1
+    paths:
+    - /api/v1/parking-slots
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - DELETE
+    - OPTIONS
+    name: Delete-location
+    path_handling: v1
+    paths:
+    - /api/v1/locations
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: Get-All-Locations
+    path_handling: v1
+    paths:
+    - /api/v1/locations
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: Get-all-slot-of-co-user
+    path_handling: v1
+    paths:
+    - /api/v1/parking-slots
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: Get-slots-by-location-id
+    path_handling: v1
+    paths:
+    - /api/v1/parking-slots
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - PUT
+    - OPTIONS
+    name: Update-Parking-Slot
+    path_handling: v1
+    paths:
+    - /api/v1/parking-slots/
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: get-detail-parking-slot
+    path_handling: v1
+    paths:
+    - /api/v1/parking-slots/slot
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: get-range
+    path_handling: v1
+    paths:
+    - /api/v1/locations/range
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  write_timeout: 60000
+- connect_timeout: 60000
+  enabled: true
+  host: smart_parking_rent_api
+  name: smart_parking_rent_svc
+  path: /
+  port: 5002
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: change-status-barrier
+    path_handling: v1
+    paths:
+    - /api/v1/mqtt
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: create-rent-request
+    path_handling: v1
+    paths:
+    - /api/v1/rent-requests
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: get-all-request
+    path_handling: v1
+    paths:
+    - /api/v1/rent-requests
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: ipn
+    path_handling: v1
+    paths:
+    - /api/v1/rent-requests/ipn
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  write_timeout: 60000
+- connect_timeout: 60000
+  enabled: true
+  host: smart_parking_user_svc
+  name: smart_parking_user_svc
+  path: /
+  port: 5001
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: Get-User-Info
+    path_handling: v1
+    paths:
+    - /api/v1/users/info
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: Get-vehicles
+    path_handling: v1
+    paths:
+    - /api/v1/vehicles
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: Sign-Up
+    path_handling: v1
+    paths:
+    - /api/v1/users/sign-up
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - PUT
+    - OPTIONS
+    name: Update-vehicles
+    path_handling: v1
+    paths:
+    - /api/v1/vehicles
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: add-device-token
+    path_handling: v1
+    paths:
+    - /api/v1/users/add-device-token
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: add-payment
+    path_handling: v1
+    paths:
+    - /api/v1/users/add-payment
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - PUT
+    - OPTIONS
+    name: change-password
+    path_handling: v1
+    paths:
+    - /api/v1/users/change-password
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: create-vehicle
+    path_handling: v1
+    paths:
+    - /api/v1/vehicles
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: get-user
+    path_handling: v1
+    paths:
+    - /api/v1/users
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - OPTIONS
+    name: get-withdraw-request
+    path_handling: v1
+    paths:
+    - /api/v1/user/withdrawal
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  - https_redirect_status_code: 426
+    methods:
+    - POST
+    - OPTIONS
+    name: make-request-withdrawal
+    path_handling: v1
+    paths:
+    - /api/v1/users/make-request-withdrawal
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: false
+  write_timeout: 60000

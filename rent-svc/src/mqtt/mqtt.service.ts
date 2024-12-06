@@ -78,6 +78,9 @@ export class MqttService implements OnModuleInit {
             userIds: [rentRequest.userId],
             title: 'Phát hiện có xe tại slot bạn đã thuê',
             body: `Biển số: ${result.result.trim()}`,
+            data: {
+              image: uploadResult.Location,
+            },
           } as SendNotificationsRequest);
         }
       } catch (error) {
