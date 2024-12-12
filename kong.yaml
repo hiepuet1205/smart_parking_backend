@@ -27,6 +27,7 @@ plugins:
     - http://localhost:9000
     - https://smart-parking-frontend-n1vb8qqba-hiepuetnbks-projects.vercel.app
     - https://smart-parking-frontend-zeta.vercel.app
+    - http://13.250.78.124:8002
     preflight_continue: true
     private_network: true
   enabled: true

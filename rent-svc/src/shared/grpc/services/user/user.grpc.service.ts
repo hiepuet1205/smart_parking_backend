@@ -1,6 +1,12 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
-import { GetVehicleInfoRequest, SendNotificationsRequest, USER_PACKAGE_NAME, UserServiceClient } from '@shared/grpc/protos/user/user';
+import {
+  GetVehicleInfoRequest,
+  SendNotificationsRequest,
+  UpdateTotalRequest,
+  USER_PACKAGE_NAME,
+  UserServiceClient,
+} from '@shared/grpc/protos/user/user';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
@@ -24,6 +30,14 @@ export class UserServiceGrpc implements OnModuleInit {
   async getVehicleInfo(request: GetVehicleInfoRequest): Promise<any> {
     try {
       return await firstValueFrom(this.userServiceClient.getVehicleInfo(request));
+    } catch (error) {
+      throw new RpcException(error);
+    }
+  }
+
+  async updateTotal(request: UpdateTotalRequest): Promise<any> {
+    try {
+      return await firstValueFrom(this.userServiceClient.updateTotal(request));
     } catch (error) {
       throw new RpcException(error);
     }

@@ -12,9 +12,10 @@ import {
   GetUserByIdResponse,
   GetVehicleInfoRequest,
   SendNotificationsRequest,
+  UpdateTotalRequest,
 } from '@protos/user/user';
 import { NotificationService } from '@notification/notification.service';
-import { DataSource, In } from 'typeorm';
+import { DataSource, In, Not } from 'typeorm';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Payment } from '@payment/entities/payment.entity';
 import { AddPaymentDto } from './dto/add-payment.dto';
@@ -28,6 +29,7 @@ import { WithdrawalRequest } from '@withdrawal-request/entities/withdrawal-reque
 import { WithdrawalRequestStatus } from '@withdrawal-request/enums/withdrawal-request-status.enum';
 import { LoggerService } from '@logger/logger.service';
 import { VehicleRepository } from '@shared/repository/vehicle.repository';
+import { UserRole } from './enum/user-role.enum';
 
 @Injectable()
 export class UsersService {
@@ -42,6 +44,24 @@ export class UsersService {
     private readonly logger: LoggerService,
     private readonly vehicleRepository: VehicleRepository,
   ) {}
+
+  async getAllUsers() {
+    return await this.usersRepository.find({ where: { role: Not(UserRole.ADMIN) } });
+  }
+
+  async updateTotal(request: UpdateTotalRequest) {
+    const user = await this.usersRepository.findOne({ where: { id: request.id } });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    user.total = user.total + Number(request.total);
+
+    await this.usersRepository.save(user);
+
+    return {
+      status: 'success',
+    };
+  }
 
   async getVehicleInfo(request: GetVehicleInfoRequest) {
     return await this.vehicleRepository.findOne({ where: { id: request.id } });
@@ -150,6 +170,21 @@ export class UsersService {
 
     if (!(await bcrypt.compare(payload.oldPassword, user.password))) {
       throw new BadRequestException('Old password is incorrect');
+    }
+
+    user.password = await bcrypt.hash(payload.newPassword, 10);
+    await this.usersRepository.save(user);
+    return {
+      status: 'success',
+      message: 'Password changed successfully',
+    };
+  }
+
+  async changePasswordUser(userId: number, payload: { newPassword: string }) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
     user.password = await bcrypt.hash(payload.newPassword, 10);

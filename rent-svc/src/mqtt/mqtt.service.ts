@@ -8,12 +8,14 @@ import { AiService } from '@shared/services/ai.service';
 import { LoggerService } from '@logger/logger.service';
 import { RentRequestRepository } from '@shared/repository/rent-request.repository';
 import { UserServiceGrpc } from '@shared/grpc';
-import FuzzySet from 'fuzzyset.js';
+import compare from 'fuzzy-comparison';
+import { RentRequestStatus } from '@rent/enum/rent-request-status.enum';
 import { SendNotificationsRequest } from '@shared/grpc/protos/user/user';
 
 @Injectable()
 export class MqttService implements OnModuleInit {
   private client: Mqtt5Client;
+  private isRetrying = false;
 
   constructor(
     private readonly fileService: FileService,
@@ -38,6 +40,10 @@ export class MqttService implements OnModuleInit {
     });
     this.client.on('connectionSuccess', () => {
       this.logger.log('AWS IOT MQTT Connection successfull');
+      setInterval(async () => {
+        const randomMessage = JSON.stringify({ message: 'Keep alive message', timestamp: new Date().toISOString() });
+        await this.publishMessage('your/topic/here', randomMessage);
+      }, 30000);
     });
     this.client.on('connectionFailure', (data) => {
       this.logger.log('AWS IOT MQTT Connection failed');
@@ -46,14 +52,50 @@ export class MqttService implements OnModuleInit {
     this.client.on('disconnection', () => {
       this.logger.log('AWS IOT MQTT Connection disconnected');
     });
+    const retryConnection = async () => {
+      if (this.isRetrying) {
+        return; // Không retry nếu đã trong quá trình retry
+      }
+      this.isRetrying = true;
+      this.logger.error('Retrying connection in 5 seconds...', 'AWS IOT MQTT Connection error');
+      setTimeout(async () => {
+        try {
+          await this.client.stop(); // Dừng client trước khi retry
+          await this.client.start(); // Khởi động lại client
+        } catch (error) {
+          this.logger.error(`Retry failed: ${error.message}`, error.stack);
+        } finally {
+          this.isRetrying = false; // Reset cờ trạng thái
+        }
+      }, 5000);
+    };
+    this.client.on('connectionFailure', (data) => {
+      this.logger.log('AWS IOT MQTT Connection failed');
+      this.logger.error(data.error.error_name, data.error.error_name);
+      retryConnection(); // Gọi hàm retry
+    });
     this.client.on('messageReceived', async (eventData: MessageReceivedEvent) => {
-      const payload = JSON.parse(new TextDecoder().decode(eventData.message.payload as ArrayBuffer));
-
-      this.logger.log(payload);
-
-      const name = `${randomUUID()}.png`;
-
       try {
+        const payload = JSON.parse(new TextDecoder().decode(eventData.message.payload as ArrayBuffer));
+
+        if (payload.status) {
+          const rentRequest = await this.rentRequestRepository.findOne({
+            where: {
+              slotId: payload.slotId,
+              status: RentRequestStatus.PAID,
+            },
+          });
+
+          await this.userService.sendNotifications({
+            userIds: [rentRequest.ownerId, rentRequest.coOwnerId],
+            title: 'Status Slot',
+            body: `There is a car moving into slot ${payload.slotId}`,
+          } as SendNotificationsRequest);
+        }
+
+        this.logger.log(payload);
+
+        const name = `${randomUUID()}.png`;
         const uploadResult = await this.fileService.uploadPublicFile(Buffer.from(payload.image, 'base64'), name);
 
         const result = await this.aiService.detectLicensePlate(uploadResult.Location);
@@ -61,28 +103,35 @@ export class MqttService implements OnModuleInit {
         const rentRequest = await this.rentRequestRepository.findOne({
           where: {
             slotId: payload.slotId,
+            status: RentRequestStatus.PAID,
           },
         });
 
         const vehicle = await this.userService.getVehicleInfo({
-          id: payload.vehicleId,
+          id: rentRequest.vehicleId,
         });
 
-        const fuzzy = FuzzySet();
-        fuzzy.add(vehicle.licensePlates);
+        console.log(vehicle.licensePlates);
 
-        const matches = fuzzy.get(result.result.trim());
+        const similarity = compare(vehicle.licensePlates, result.result.trim(), {
+          threshold: 1,
+        });
+        console.log(similarity);
+        console.log(result);
 
-        if (matches && matches[0][0] > 0.9) {
+        // if (similarity) {
           await this.userService.sendNotifications({
             userIds: [rentRequest.userId],
-            title: 'Phát hiện có xe tại slot bạn đã thuê',
-            body: `Biển số: ${result.result.trim()}`,
+            title: 'Car found in the slot you rented',
+            body: `License plate: ${result.result.trim()}`,
             data: {
               image: uploadResult.Location,
+              type: 'VEHICLE_FOUND',
+              slotId: payload.slotId,
+              plateNumber: result.result.trim(),
             },
-          } as SendNotificationsRequest);
-        }
+          });
+        // }
       } catch (error) {
         this.logger.error(error.message, error.stack);
       }

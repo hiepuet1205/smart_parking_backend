@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { SignUpDto } from './dto/create-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -7,6 +7,8 @@ import { JwtAccessTokenGuard } from '@web-init/guards/jwt-access-token.guard';
 import { User } from '@shared/decorators/user.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { AddPaymentDto } from './dto/add-payment.dto';
+import { Roles } from '@shared/decorators/roles.decorator';
+import { UserRole } from './enum/user-role.enum';
 
 @Controller('users')
 export class UsersController {
@@ -24,11 +26,11 @@ export class UsersController {
     return this.usersService.getInfo(userId);
   }
 
-  @UseGuards(JwtAccessTokenGuard)
-  @Get('')
-  async getUser(@Query('email') email: string) {
-    return this.usersService.getUser(email);
-  }
+  // @UseGuards(JwtAccessTokenGuard)
+  // @Get('')
+  // async getUser(@Query('email') email: string) {
+  //   return this.usersService.getUser(email);
+  // }
 
   @UseGuards(JwtAccessTokenGuard)
   @Post('add-device-token')
@@ -58,5 +60,26 @@ export class UsersController {
   @Get('withdrawal')
   async getWithdrawalRequests(@User('id') userId: number) {
     return this.usersService.getWithdrawalRequests(userId);
+  }
+
+  @UseGuards(JwtAccessTokenGuard)
+  @Get(':id')
+  @Roles([UserRole.ADMIN])
+  async getUserById(@Param('id') id: number) {
+    return this.usersService.getUserById({ id });
+  }
+
+  @UseGuards(JwtAccessTokenGuard)
+  @Get()
+  @Roles([UserRole.ADMIN])
+  async getAllUsers() {
+    return this.usersService.getAllUsers();
+  }
+
+  @UseGuards(JwtAccessTokenGuard)
+  @Roles([UserRole.ADMIN])
+  @Put('change-password-user/:id')
+  async changePasswordUser(@Param('id') id: number, @Body() payload: { newPassword: string }) {
+    return this.usersService.changePasswordUser(id, payload);
   }
 }

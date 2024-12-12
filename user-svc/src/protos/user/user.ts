@@ -2,13 +2,22 @@
 // versions:
 //   protoc-gen-ts_proto  v2.0.3
 //   protoc               v3.12.4
-// source: src/protos/user/user.proto
+// source: user/user.proto
 
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 
 export const protobufPackage = "user";
+
+export interface UpdateTotalRequest {
+  id: number;
+  total: string;
+}
+
+export interface UpdateTotalResponse {
+  status: string;
+}
 
 export interface GetVehicleInfoRequest {
   id: number;
@@ -82,6 +91,8 @@ export interface UserServiceClient {
   sendNotifications(request: SendNotificationsRequest): Observable<SendNotificationsResponse>;
 
   getVehicleInfo(request: GetVehicleInfoRequest): Observable<GetVehicleInfoResponse>;
+
+  updateTotal(request: UpdateTotalRequest): Observable<UpdateTotalResponse>;
 }
 
 export interface UserServiceController {
@@ -100,11 +111,21 @@ export interface UserServiceController {
   getVehicleInfo(
     request: GetVehicleInfoRequest,
   ): Promise<GetVehicleInfoResponse> | Observable<GetVehicleInfoResponse> | GetVehicleInfoResponse;
+
+  updateTotal(
+    request: UpdateTotalRequest,
+  ): Promise<UpdateTotalResponse> | Observable<UpdateTotalResponse> | UpdateTotalResponse;
 }
 
 export function UserServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getUserById", "getUserByEmail", "sendNotifications", "getVehicleInfo"];
+    const grpcMethods: string[] = [
+      "getUserById",
+      "getUserByEmail",
+      "sendNotifications",
+      "getVehicleInfo",
+      "updateTotal",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UserService", method)(constructor.prototype[method], method, descriptor);

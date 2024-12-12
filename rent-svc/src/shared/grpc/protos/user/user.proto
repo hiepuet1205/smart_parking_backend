@@ -7,6 +7,16 @@ service UserService {
   rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse) {}
   rpc SendNotifications(SendNotificationsRequest) returns (SendNotificationsResponse) {}
   rpc GetVehicleInfo(GetVehicleInfoRequest) returns (GetVehicleInfoResponse) {}
+  rpc UpdateTotal(UpdateTotalRequest) returns (UpdateTotalResponse) {}
+}
+
+message UpdateTotalRequest {
+  int32 id = 1;
+  string total = 2;
+}
+
+message UpdateTotalResponse {
+  string status = 1;
 }
 
 message GetVehicleInfoRequest {

@@ -4,6 +4,7 @@ import {
   GetUserByIdRequest,
   GetVehicleInfoRequest,
   SendNotificationsRequest,
+  UpdateTotalRequest,
   UserServiceControllerMethods,
 } from '@protos/user/user';
 import { UsersService } from './users.service';
@@ -30,5 +31,9 @@ export class UsersGrpcController {
 
   async getVehicleInfo(request: GetVehicleInfoRequest) {
     return await this.usersService.getVehicleInfo(request);
+  }
+
+  async updateTotal(request: UpdateTotalRequest) {
+    return await this.usersService.updateTotal(request);
   }
 }

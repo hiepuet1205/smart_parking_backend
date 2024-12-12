@@ -22,6 +22,8 @@ import { LocationServiceGrpc, UserServiceGrpc } from '@shared/grpc';
 import { SendNotificationsRequest } from '@shared/grpc/protos/user/user';
 import { ParkingSlotStatus } from './enum/parking-slot-status.enum';
 import { In } from 'typeorm';
+import { RentRequest } from './entities/rent-request.entity';
+import { CronJob } from 'cron';
 
 @Injectable()
 export class RentRequestService {
@@ -31,6 +33,53 @@ export class RentRequestService {
     private readonly locationService: LocationServiceGrpc,
     private readonly userService: UserServiceGrpc,
   ) {}
+
+  async find(query: { status: RentRequestStatus[] }) {
+    let whereConditions = [];
+
+    if (query?.status?.length) {
+      whereConditions = whereConditions.map((condition) => {
+        return {
+          ...condition,
+          status: In(query.status),
+        };
+      });
+    }
+
+    const requets = await this.rentRequestRepository.find({
+      where: whereConditions,
+    });
+
+    await Promise.all(
+      requets.map(async (rentRequest) => {
+        const slot = await this.locationService.getInfoSlot({
+          id: rentRequest.slotId,
+        });
+        if (slot) {
+          (rentRequest as any).slot = slot;
+        }
+      }),
+    );
+    return requets;
+  }
+
+  async getOne(userId: number, id: number) {
+    const rent = await this.rentRequestRepository.findOne({
+      where: {
+        id,
+        userId,
+      },
+    });
+
+    const slot = await this.locationService.getInfoSlot({
+      id: rent.slotId,
+    });
+    if (slot) {
+      (rent as any).slot = slot;
+    }
+
+    return rent;
+  }
 
   async create(body: CreateRentRequestDto, userId: number) {
     const slot = await this.locationService.getInfoSlot({
@@ -110,14 +159,18 @@ export class RentRequestService {
         await Promise.all([
           this.userService.sendNotifications({
             userIds: [rentRequest.userId],
-            title: 'Hoàn thành đơn hàng',
-            body: `Yêu cầu thuê slot ${slot.extractLocation} đã được xác nhận`,
+            title: 'Order confirmed',
+            body: `Request to rent slot ${slot.extractLocation} has been confirmed`,
           } as SendNotificationsRequest),
           this.userService.sendNotifications({
             userIds: [slot.userId, slot.coUserId],
-            title: 'Yêu cầu thuê slot đỗ xe mới',
-            body: `Có một yêu cầu thuê slot ${slot.extractLocation} đã được xác nhận`,
+            title: 'New rent request',
+            body: `There is a confirmed request to lease slot ${slot.extractLocation}`,
           } as SendNotificationsRequest),
+          this.userService.updateTotal({
+            id: rentRequest.coOwnerId ?? rentRequest.ownerId,
+            total: rentRequest.depositAmount.toString(),
+          }),
         ]);
       } catch (error) {
         this.logger.error(`send notification error: ${error}`, error);
@@ -192,37 +245,18 @@ export class RentRequestService {
     } as Refund);
   }
 
-  // addCronJobFollowRequest(rentRequest: RentRequest, verify: VerifyReturnUrl) {
-  //   const job = new CronJob(rentRequest.endTime, async () => {
-  //     // check xe con o slot ko
-  //     // neu khong => refund
-  //     const ok = true;
-  //     if (ok) {
-  //       await Promise.all([
-  //         this.refundAmountRentRequest(rentRequest, verify),
-  //         this.rentRequestRepository.update(rentRequest.id, {
-  //           status: RentRequestStatus.REFUNDED,
-  //         }),
-  //       ]);
-  //     } else {
-  //       // neu co => canh bao nguoi dung => tao cron sau 1 tieng
-  //     }
+  addCronJobChangeStatus(rentRequest: RentRequest) {
+    const job = new CronJob(rentRequest.endTime, async () => {
+      await this.locationService.updateStatusSlot({
+        id: rentRequest.slotId,
+        status: ParkingSlotStatus.AVAILABLE,
+      });
 
-  //     this.schedulerRegistry.deleteCronJob(`follow-request-job-${rentRequest.id}`);
-  //   });
+      await this.rentRequestRepository.update(rentRequest.id, {
+        status: RentRequestStatus.COMPLETED,
+      });
+    });
 
-  //   this.schedulerRegistry.addCronJob(`follow-request-job-${rentRequest.id}`, job);
-  //   job.start();
-  // }
-
-  // async refundAmountRentRequest(rentRequest: RentRequest, verify: VerifyReturnUrl) {
-  //   const timeInvalid = (Date.now() - rentRequest.endTime.getTime()) / 1000 / 60 / 60;
-  //   const amountInvalid = timeInvalid * rentRequest.pricePerHour;
-  //   const amountRefund = rentRequest.depositAmount > amountInvalid ? rentRequest.depositAmount - amountInvalid : 0;
-
-  //   const refundInfo = 'Hoàn tiền';
-  //   if (amountRefund > 0) {
-  //     await this.refund(rentRequest.txnRef, new Date(verify.vnp_PayDate), amountRefund, refundInfo, verify.vnp_TxnRef);
-  //   }
-  // }
+    job.start();
+  }
 }

@@ -8,6 +8,11 @@ export class MqttController {
   @Post()
   async mqtt(@Body() { slotId, status }) {
     const topic = `barrier-${slotId}`;
-    await this.mqttService.publishMessage(topic, status);
+    await this.mqttService.publishMessage(
+      topic,
+      JSON.stringify({
+        controlBarie: status,
+      }),
+    );
   }
 }
